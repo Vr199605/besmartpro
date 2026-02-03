@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeSmart PRO - Sistema Inteligente de Seguros</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #00b09b;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+            min-height: 90vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.8rem 1rem;
+            margin: 0.3rem 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-left: 6px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .seguradora-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-top: 6px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s ease;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.8rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .coverage-badge {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin: 0.2rem;
+        }
+
+        .accordion-button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 10px !important;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            padding: 2rem;
+            background: white;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            margin-right: 0.5rem;
+            background: #f8f9fa;
+            color: var(--dark);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row main-container mx-auto" style="max-width: 1400px;">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">🚀 BeSmart PRO</h2>
+                    <p class="mb-0">Sistema Inteligente de Seguros</p>
+                </div>
+                
+                <div class="nav flex-column" id="sidebar-nav">
+                    <a class="nav-link active" href="#" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="#" data-tab="cadastro">
+                        <i class="fas fa-user"></i> Cadastro Completo
+                    </a>
+                    <a class="nav-link" href="#" data-tab="escolher">
+                        <i class="fas fa-trophy"></i> Como Escolher
+                    </a>
+                    <a class="nav-link" href="#" data-tab="cliente">
+                        <i class="fas fa-users"></i> Análise do Cliente
+                    </a>
+                    <a class="nav-link" href="#" data-tab="coberturas">
+                        <i class="fas fa-shield-alt"></i> Análise de Coberturas
+                    </a>
+                    <a class="nav-link" href="#" data-tab="comparativo">
+                        <i class="fas fa-chart-bar"></i> Comparativo
+                    </a>
+                    <a class="nav-link" href="#" data-tab="faq">
+                        <i class="fas fa-question-circle"></i> FAQ
+                    </a>
+                </div>
+
+                <div class="mt-5">
+                    <h6 class="text-center mb-3">🏢 Nossas Seguradoras</h6>
+                    <div class="row g-2">
+                        <div class="col-6 text-center">
+                            <div class="bg-white bg-opacity-10 p-2 rounded">
+                                <small>🌟 Omint</small>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="bg-white bg-opacity-10 p-2 rounded">
+                                <small>💫 MAG</small>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="bg-white bg-opacity-10 p-2 rounded">
+                                <small>⚡ Icatu</small>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="bg-white bg-opacity-10 p-2 rounded">
+                                <small>🔮 Prudential</small>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="bg-white bg-opacity-10 p-2 rounded">
+                                <small>🎯 MetLife</small>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="bg-white bg-opacity-10 p-2 rounded">
+                                <small>🚀 Azos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-outline-light w-100 mb-2" onclick="gerarRelatorio()">
+                        📄 Relatório
+                    </button>
+                    <button class="btn btn-light w-100" onclick="novaSimulacao()">
+                        🔄 Nova Simulação
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Dashboard Tab -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <div class="hero-section">
+                        <h1 class="display-4 fw-bold">🚀 BeSmart PRO</h1>
+                        <h3 class="fw-light">Sistema Inteligente de Cálculo de Capital Segurado</h3>
+                        <div class="mt-3">
+                            <span class="coverage-badge">🌟 Omint</span>
+                            <span class="coverage-badge">💫 MAG</span>
+                            <span class="coverage-badge">⚡ Icatu</span>
+                            <span class="coverage-badge">🔮 Prudential</span>
+                            <span class="coverage-badge">🎯 MetLife</span>
+                            <span class="coverage-badge">🚀 Azos</span>
+                        </div>
+                    </div>
+
+                    <div class="row" id="dashboard-metrics">
+                        <!-- Metrics will be populated by JavaScript -->
+                    </div>
+
+                    <div class="card mt-4" id="cliente-info">
+                        <div class="card-body text-center py-5">
+                            <h4 class="text-muted">Complete seu cadastro para ver sua análise personalizada</h4>
+                            <button class="btn btn-primary mt-3" onclick="switchTab('cadastro')">
+                                <i class="fas fa-user-plus"></i> Iniciar Cadastro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cadastro Tab -->
+                <div id="cadastro-tab" class="tab-content" style="display: none;">
+                    <h2 class="mb-4">👤 Cadastro Completo</h2>
+                    
+                    <div class="mb-4">
+                        <div class="progress-bar mb-2">
+                            <div class="progress-fill" id="cadastro-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span><i class="fas fa-circle"></i> Cadastro</span>
+                            <span><i class="far fa-circle"></i> Análise</span>
+                            <span><i class="far fa-circle"></i> Resultado</span>
+                        </div>
+                    </div>
+
+                    <form id="cadastro-form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nome Completo *</label>
+                                <input type="text" class="form-control" id="nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Idade *</label>
+                                <input type="number" class="form-control" id="idade" min="18" max="80" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Profissão *</label>
+                                <input type="text" class="form-control" id="profissao" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Estado Civil *</label>
+                                <select class="form-control" id="estado-civil" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Solteiro(a)">Solteiro(a)</option>
+                                    <option value="Casado(a)">Casado(a)</option>
+                                    <option value="Divorciado(a)">Divorciado(a)</option>
+                                    <option value="Viúvo(a)">Viúvo(a)</option>
+                                    <option value="União Estável">União Estável</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Renda Mensal (R$) *</label>
+                                <input type="number" class="form-control" id="renda" step="0.01" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Patrimônio Total (R$)</label>
+                                <input type="number" class="form-control" id="patrimonio" step="0.01">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Número de Dependentes *</label>
+                                <input type="number" class="form-control" id="dependentes" min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">É o pilar financeiro? *</label>
+                                <select class="form-control" id="pilar-financeiro" required>
+                                    <option value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5>🎯 Selecione seus perfis:</h5>
+                            <div class="row" id="perfis-container">
+                                <!-- Perfis will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                🚀 Calcular Capital Segurado
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Outras abas... -->
+                <div id="escolher-tab" class="tab-content" style="display: none;">
+                    <h2>🏆 Como Escolher o Melhor</h2>
+                    <!-- Conteúdo da aba Como Escolher -->
+                </div>
+
+                <div id="cliente-tab" class="tab-content" style="display: none;">
+                    <h2>👥 Análise do Cliente</h2>
+                    <!-- Conteúdo da aba Cliente -->
+                </div>
+
+                <div id="coberturas-tab" class="tab-content" style="display: none;">
+                    <h2>🛡️ Análise de Coberturas</h2>
+                    <!-- Conteúdo da aba Coberturas -->
+                </div>
+
+                <div id="comparativo-tab" class="tab-content" style="display: none;">
+                    <h2>📊 Comparativo de Produtos</h2>
+                    <!-- Conteúdo da aba Comparativo -->
+                </div>
+
+                <div id="faq-tab" class="tab-content" style="display: none;">
+                    <h2>❓ FAQ Interativo</h2>
+                    <!-- Conteúdo da aba FAQ -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/typescript">
+        // Estado da aplicação
+        interface Cliente {
+            nome: string;
+            idade: number;
+            profissao: string;
+            estadoCivil: string;
+            renda: number;
+            patrimonio: number;
+            dependentes: number;
+            pilarFinanceiro: boolean;
+            perfis: string[];
+            capitalSugerido?: number;
+        }
+
+        interface Seguradora {
+            nome: string;
+            pontuacao: number;
+            especialidade: string[];
+            vantagens: string[];
+            cor: string;
+            tempoAprovacao: string;
+            precoMedio: string;
+            perfilIdeal: string;
+        }
+
+        class BeSmartApp {
+            private cliente: Cliente | null = null;
+            private seguradoras: Seguradora[] = [
+                {
+                    nome: "Azos",
+                    pontuacao: 8.5,
+                    especialidade: ["Porte de Armas", "Profissões de Risco", "DIT"],
+                    vantagens: ["Aceita porte de armas", "Cobertura DIT ampla", "Perfis especiais"],
+                    cor: "#7C3AED",
+                    tempoAprovacao: "24h",
+                    precoMedio: "R$ 89,90",
+                    perfilIdeal: "Profissionais com porte de armas"
+                },
+                {
+                    nome: "Prudential",
+                    pontuacao: 9.0,
+                    especialidade: ["Doenças Graves", "Planejamento Sucessório"],
+                    vantagens: ["Cobertura ampliada doenças graves", "Solução sucessória"],
+                    cor: "#1E40AF",
+                    tempoAprovacao: "48h",
+                    precoMedio: "R$ 199,90",
+                    perfilIdeal: "Clientes com foco em proteção"
+                },
+                {
+                    nome: "Omint",
+                    pontuacao: 9.4,
+                    especialidade: ["Alta Renda", "Executivos", "Saúde Premium"],
+                    vantagens: ["Rede médica exclusiva", "Atendimento concierge"],
+                    cor: "#FF6B35",
+                    tempoAprovacao: "24-72h",
+                    precoMedio: "R$ 299+",
+                    perfilIdeal: "Executivos de alta renda"
+                }
+            ];
+
+            private perfisCliente: string[] = [
+                "Profissão com porte de armas",
+                "70 anos + Doenças Graves",
+                "Só quer DIT",
+                "Baixa renda",
+                "Alta renda",
+                "Pagamento Unico",
+                "Resgate",
+                "Jovem com filho pequeno",
+                "85 anos",
+                "Modular"
+            ];
+
+            constructor() {
+                this.initEventListeners();
+                this.carregarPerfis();
+                this.carregarDadosIniciais();
+            }
+
+            private initEventListeners(): void {
+                // Navegação
+                document.querySelectorAll('[data-tab]').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const tab = (e.target as HTMLElement).getAttribute('data-tab');
+                        this.switchTab(tab!);
+                    });
+                });
+
+                // Formulário de cadastro
+                const form = document.getElementById('cadastro-form');
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processarCadastro();
+                    });
+                }
+            }
+
+            private carregarPerfis(): void {
+                const container = document.getElementById('perfis-container');
+                if (!container) return;
+
+                container.innerHTML = '';
+                this.perfisCliente.forEach((perfil, index) => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6';
+                    col.innerHTML = `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="perfil-${index}">
+                            <label class="form-check-label" for="perfil-${index}">
+                                ${perfil}
+                            </label>
+                        </div>
+                    `;
+                    container.appendChild(col);
+                });
+            }
+
+            private carregarDadosIniciais(): void {
+                // Carregar dados do localStorage se existirem
+                const dadosSalvos = localStorage.getItem('besmart-cliente');
+                if (dadosSalvos) {
+                    this.cliente = JSON.parse(dadosSalvos);
+                    this.atualizarDashboard();
+                }
+            }
+
+            private processarCadastro(): void {
+                // Coletar dados do formulário
+                const nome = (document.getElementById('nome') as HTMLInputElement).value;
+                const idade = parseInt((document.getElementById('idade') as HTMLInputElement).value);
+                const profissao = (document.getElementById('profissao') as HTMLInputElement).value;
+                const estadoCivil = (document.getElementById('estado-civil') as HTMLSelectElement).value;
+                const renda = parseFloat((document.getElementById('renda') as HTMLInputElement).value);
+                const patrimonio = parseFloat((document.getElementById('patrimonio') as HTMLInputElement).value) || 0;
+                const dependentes = parseInt((document.getElementById('dependentes') as HTMLInputElement).value);
+                const pilarFinanceiro = (document.getElementById('pilar-financeiro') as HTMLSelectElement).value === 'true';
+
+                // Coletar perfis selecionados
+                const perfisSelecionados: string[] = [];
+                this.perfisCliente.forEach((_, index) => {
+                    const checkbox = document.getElementById(`perfil-${index}`) as HTMLInputElement;
+                    if (checkbox && checkbox.checked) {
+                        perfisSelecionados.push(this.perfisCliente[index]);
+                    }
+                });
+
+                // Calcular capital segurado
+                const capitalSugerido = this.calcularCapitalSegurado({
+                    idade,
+                    renda,
+                    patrimonio,
+                    dependentes,
+                    pilarFinanceiro
+                });
+
+                // Salvar cliente
+                this.cliente = {
+                    nome,
+                    idade,
+                    profissao,
+                    estadoCivil,
+                    renda,
+                    patrimonio,
+                    dependentes,
+                    pilarFinanceiro,
+                    perfis: perfisSelecionados,
+                    capitalSugerido
+                };
+
+                // Salvar no localStorage
+                localStorage.setItem('besmart-cliente', JSON.stringify(this.cliente));
+
+                // Atualizar interface
+                this.atualizarDashboard();
+                this.switchTab('dashboard');
+                this.mostrarMensagemSucesso('Cadastro realizado com sucesso! Capital calculado.');
+            }
+
+            private calcularCapitalSegurado(dados: any): number {
+                // Cálculo simplificado baseado na lógica do sistema
+                let capital = 0;
+                
+                // Doenças Graves: 36x despesas (estimando 60% da renda)
+                const despesasMensais = dados.renda * 0.6;
+                capital += despesasMensais * 36;
+                
+                // Whole Life: 20% do patrimônio se pilar, 15% se não
+                const percentualPatrimonio = dados.pilarFinanceiro ? 0.20 : 0.15;
+                capital += dados.patrimonio * percentualPatrimonio;
+                
+                // Term Life: Despesas com filhos x anos (estimando)
+                if (dados.dependentes > 0) {
+                    const despesasFilhos = despesasMensais * 0.3;
+                    capital += despesasFilhos * 12 * 20; // 20 anos
+                }
+                
+                // Invalidez Permanente: 100x renda
+                capital += dados.renda * 100;
+                
+                return Math.round(capital);
+            }
+
+            private atualizarDashboard(): void {
+                if (!this.cliente) return;
+
+                const metricsContainer = document.getElementById('dashboard-metrics');
+                if (metricsContainer) {
+                    metricsContainer.innerHTML = `
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="text-muted mb-2">💰 Capital Sugerido</div>
+                                <div class="h3 text-primary">R$ ${this.formatarMoeda(this.cliente.capitalSugerido || 0)}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="text-muted mb-2">🛡️ Score de Risco</div>
+                                <div class="h3 text-success">${this.calcularScoreRisco()}/100</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="text-muted mb-2">👨‍👩‍👧‍👦 Dependentes</div>
+                                <div class="h3 text-info">${this.cliente.dependentes}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="text-muted mb-2">📊 Coberturas</div>
+                                <div class="h3 text-purple">6/6</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const clienteInfo = document.getElementById('cliente-info');
+                if (clienteInfo) {
+                    clienteInfo.innerHTML = `
+                        <div class="card-body">
+                            <h4 class="card-title">👤 ${this.cliente.nome}</h4>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p><strong>Idade:</strong> ${this.cliente.idade} anos</p>
+                                    <p><strong>Profissão:</strong> ${this.cliente.profissao}</p>
+                                    <p><strong>Estado Civil:</strong> ${this.cliente.estadoCivil}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Renda Mensal:</strong> R$ ${this.formatarMoeda(this.cliente.renda)}</p>
+                                    <p><strong>Patrimônio:</strong> R$ ${this.formatarMoeda(this.cliente.patrimonio)}</p>
+                                    <p><strong>Pilar Financeiro:</strong> ${this.cliente.pilarFinanceiro ? 'Sim' : 'Não'}</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button class="btn btn-primary me-2" onclick="app.switchTab('coberturas')">
+                                    Ver Coberturas
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="app.switchTab('comparativo')">
+                                    Comparar Seguradoras
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Atualizar progresso do cadastro
+                document.getElementById('cadastro-progress')!.style.width = '100%';
+            }
+
+            private calcularScoreRisco(): number {
+                if (!this.cliente) return 100;
+                
+                let score = 100;
+                if (this.cliente.idade > 50) score -= 20;
+                else if (this.cliente.idade > 40) score -= 10;
+                
+                if (this.cliente.dependentes > 3) score -= 15;
+                
+                return Math.max(30, score);
+            }
+
+            private formatarMoeda(valor: number): string {
+                return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            private mostrarMensagemSucesso(mensagem: string): void {
+                alert(mensagem); // Em produção, usar um toast ou modal mais elegante
+            }
+
+            public switchTab(tabName: string): void {
+                // Atualizar navegação
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+
+                // Mostrar aba selecionada
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    (tab as HTMLElement).style.display = 'none';
+                });
+                document.getElementById(`${tabName}-tab`)!.style.display = 'block';
+
+                // Atualizar conteúdo específico da aba
+                switch(tabName) {
+                    case 'comparativo':
+                        this.carregarComparativo();
+                        break;
+                    case 'coberturas':
+                        this.carregarCoberturas();
+                        break;
+                }
+            }
+
+            private carregarComparativo(): void {
+                const container = document.getElementById('comparativo-tab');
+                if (!container || !this.cliente) return;
+
+                let html = '<h2>📊 Comparativo de Seguradoras</h2>';
+                
+                // Ordenar seguradoras por compatibilidade
+                const seguradorasCompatibilidade = this.seguradoras.map(seg => ({
+                    ...seg,
+                    compatibilidade: this.calcularCompatibilidade(seg)
+                })).sort((a, b) => b.compatibilidade - a.compatibilidade);
+
+                seguradorasCompatibilidade.forEach((seg, index) => {
+                    const emoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                    html += `
+                        <div class="seguradora-card mt-3" style="border-color: ${seg.cor}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h4>${emoji} ${seg.nome}</h4>
+                                    <p class="text-muted">${seg.perfilIdeal}</p>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-primary fs-6">${seg.compatibilidade}% Match</div>
+                                    <div class="text-muted small">Pontuação: ${seg.pontuacao}/10</div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <strong>Especialidades:</strong>
+                                <div class="mt-2">
+                                    ${seg.especialidade.map(esp => 
+                                        `<span class="coverage-badge" style="background: ${seg.cor}">${esp}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <strong>Vantagens:</strong>
+                                    <ul>
+                                        ${seg.vantagens.map(v => `<li>${v}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Preço Médio:</strong> ${seg.precoMedio}</p>
+                                    <p><strong>Tempo de Aprovação:</strong> ${seg.tempoAprovacao}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            private calcularCompatibilidade(seguradora: Seguradora): number {
+                if (!this.cliente) return 0;
+                
+                let compatibilidade = 50; // Base
+                
+                // Lógica simplificada de compatibilidade
+                if (this.cliente.renda > 25000 && seguradora.especialidade.includes('Alta Renda')) {
+                    compatibilidade += 30;
+                }
+                
+                if (this.cliente.dependentes > 0 && seguradora.nome === 'Prudential') {
+                    compatibilidade += 20;
+                }
+                
+                if (this.cliente.perfis.some(p => p.includes('porte de armas')) && seguradora.nome === 'Azos') {
+                    compatibilidade += 40;
+                }
+                
+                return Math.min(100, compatibilidade);
+            }
+
+            private carregarCoberturas(): void {
+                const container = document.getElementById('coberturas-tab');
+                if (!container || !this.cliente) return;
+
+                const coberturas = [
+                    { nome: 'Doenças Graves', valor: this.cliente.renda * 0.6 * 36, icone: '🦠' },
+                    { nome: 'Whole Life', valor: this.cliente.patrimonio * (this.cliente.pilarFinanceiro ? 0.20 : 0.15), icone: '🏠' },
+                    { nome: 'Term Life', valor: this.cliente.dependentes > 0 ? this.cliente.renda * 0.3 * 12 * 20 : 0, icone: '📚' },
+                    { nome: 'Invalidez Permanente', valor: this.cliente.renda * 100, icone: '♿' },
+                    { nome: 'DIT', valor: this.cliente.renda * 0.6 / 30, icone: '💼' },
+                    { nome: 'DIH', valor: this.cliente.renda * 0.6 / 30, icone: '🏥' }
+                ];
+
+                let html = `
+                    <div class="hero-section">
+                        <h2>🛡️ Análise de Coberturas</h2>
+                        <p>Proteção Personalizada para ${this.cliente.nome}</p>
+                    </div>
+                    <div class="row mt-4">
+                `;
+
+                coberturas.forEach(cobertura => {
+                    html += `
+                        <div class="col-md-4 mb-3">
+                            <div class="metric-card">
+                                <div class="h1">${cobertura.icone}</div>
+                                <h5>${cobertura.nome}</h5>
+                                <div class="h4 text-primary">
+                                    ${cobertura.nome.includes('Diária') ? 'R$ ' + this.formatarMoeda(cobertura.valor) + '/dia' : 'R$ ' + this.formatarMoeda(cobertura.valor)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                container.innerHTML = html;
+            }
+        }
+
+        // Inicializar aplicação
+        let app: BeSmartApp;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new BeSmartApp();
+        });
+
+        // Funções globais para botões
+        function gerarRelatorio(): void {
+            if (!app['cliente']) {
+                alert('Complete o cadastro primeiro!');
+                return;
+            }
+            alert('Relatório gerado com sucesso!');
+            // Em produção, geraria PDF ou arquivo para download
+        }
+
+        function novaSimulacao(): void {
+            if (confirm('Deseja iniciar uma nova simulação? Os dados atuais serão perdidos.')) {
+                localStorage.removeItem('besmart-cliente');
+                window.location.reload();
+            }
+        }
+
+        // Expor app globalmente para acesso pelos botões HTML
+        (window as any).app = app;
+    </script>
+</body>
+</html>
